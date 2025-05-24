@@ -5,9 +5,9 @@ const bookSchema = new mongoose.Schema({
   author: String,
   genre: String,
   published: Number,
-  borrowed: { type: Boolean, default: false },
-  borrowedBy: { type: String, default: '' },
-  borrowDate: { type: String, default: '' }
+  reserved: { type: Boolean, default: false },
+  reservedBy: { type: String, default: '' },
+  reservedDate: { type: String, default: '' }
 });
 
 module.exports = mongoose.model('Book', bookSchema);

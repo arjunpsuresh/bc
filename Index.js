@@ -8,7 +8,7 @@ require('./Connection');
 const userModel = require('./Model/User');
 const bookModel = require('./Model/book');
 const reviewModel = require('./Model/review'); // ✅ REQUIRED
-
+const bookRoutes = require('./routes/bookRoutes');
 // initialize
 const app = express();
 
@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use('/api/books', require('./routes/books'));
-
+app.use('/api/books', bookRoutes);
 
 
 // Predefined admin credentials
@@ -243,7 +243,37 @@ app.post('/reset-password', async (req, res) => {
     }
 });
 
+const calculateFine = (reservedDate) => {
+  const gracePeriod = 7; // 7 days allowed
+  const finePerDay = 5;  // ₹5 per extra day
 
+  const now = new Date();
+  const reservedTime = new Date(reservedDate);
+  const daysLate = Math.floor((now - reservedTime) / (1000 * 60 * 60 * 24)) - gracePeriod;
+
+  return daysLate > 0 ? daysLate * finePerDay : 0;
+};
+
+exports.getAllBooks = async (req, res) => {
+  try {
+    const books = await Book.find();
+    const updatedBooks = books.map(book => {
+      let fine = 0;
+      if (book.reserved && book.reservedDate) {
+        fine = calculateFine(book.reservedDate);
+      }
+
+      return {
+        ...book.toObject(),
+        fine,
+      };
+    });
+
+    res.status(200).json(updatedBooks);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch books' });
+  }
+};
 // Health Check
 app.get('/', (req, res) => {
     res.send('Server is running...');
