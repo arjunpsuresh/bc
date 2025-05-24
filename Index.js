@@ -4,19 +4,21 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const getResponse = require('./chatbot');
-
 require('./Connection');
 const userModel = require('./Model/User');
 const bookModel = require('./Model/book');
 const reviewModel = require('./Model/review'); // ✅ REQUIRED
-const bookRoutes = require('./routes/books');
+
 // initialize
 const app = express();
 
 // middleware 
 app.use(express.json());
 app.use(cors());
-app.use('/api/books', bookRoutes);
+app.use('/api/books', require('./routes/books'));
+
+
+
 // Predefined admin credentials
 const admins = [
   { username: 'allenjoshy', password: 'allenjoshy@14' },
@@ -240,6 +242,7 @@ app.post('/reset-password', async (req, res) => {
         res.status(500).send({ message: 'Error resetting password' });
     }
 });
+
 
 // Health Check
 app.get('/', (req, res) => {
